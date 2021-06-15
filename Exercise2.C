@@ -60,7 +60,7 @@ void Exercise2Solution()
   const std::string NDLAR_RHC = "/pnfs/dune/persistent/users/marshalc/CAF/CAFv5/00/CAF_RHC_90*.root"; //ND-LAr RHC
   
   // Source of events - load them from the one of the sets of files
-  SpectrumLoader loader(NDGAR_FHC); // ***** Change this to use a different sample ***
+  SpectrumLoader loader(NDGAR_FHC); // ***** Change this to use a different sample *****
 
   // We want to plot a histogram with 40 bins, covering the range 0 to 10 GeV
   const Binning binsEnergy = Binning::Simple(40, 0, 10);
@@ -90,9 +90,10 @@ void Exercise2Solution()
    - QE interactions
    Define a cut that requires all of those on the line below
     */
-  const Cut kIsCCQE = kIsQE && kIsNumuCC && !kIsAntiNu;
+  //const Cut kIsCCQE = ************;
   
-  Spectrum sTrueEQE(loader, axTrue, kIsCCQE);
+  // Make your spectrum
+  //Spectrum sTrueEQE(****************);
 
 
   // Fill all the Spectrum objects
@@ -106,21 +107,10 @@ void Exercise2Solution()
   // Convert and draw
   TCanvas *canvas = new TCanvas; // Make a canvas
   
-  TH1D *hTrueEQE = sTrueEQE.ToTH1(pot, kBlue);// Draw our spectrum in blue. ROOT colors are defined at https://root.cern.ch/doc/master/classTColor.html
+  TH1D *hTrueEQE = sTrueEQE.ToTH1(pot, kBlue);// Turn spectrum to histogram and draw it
+  hTrueEQE->Draw("HIST");
+  //ROOT colors are defined at https://root.cern.ch/doc/master/classTColor.html
 
-  hTrueEQE->Draw("HIST"); // This time we turn our spectrum into a ROOT histogram, and draw that. It means we can use the histogram for other things - like a legend.
-  
-  
-  gPad->SetLogy(false);
-  
-  /*auto legend = new TLegend(0.75,0.65,0.9,0.9); // x and y coordinates of corners
-  legend->SetHeader("Legend","C"); // option "C" to center the header
-  legend->AddEntry(hTrueENumu,"#nu_{#mu}","l");
-  legend->AddEntry(hTrueENumubar,"#bar{#nu}_{#mu}","l");
-  legend->AddEntry(hTrueENue,"#nu_{e}","l");
-  legend->AddEntry(hTrueENuebar,"#bar{#nu}_{e}","l");
 
-  legend->Draw();
-  */
   canvas->SaveAs("Exercise2.png"); // Save the result
 }
