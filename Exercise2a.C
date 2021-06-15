@@ -28,6 +28,7 @@
 #include "TPad.h" // Canvases are divided into pads. That could let you draw more than one plot on a canvas, if you wanted to, by using multiple pads. We will not bother with that today.
 #include "TLegend.h" // Lets us draw a legend
 #include "TMath.h" // I'll use some basic math functions
+#include "THStack.h" // We'll have a stacked histogram this time
 
 // Standard C++ library for input and output
 #include <iostream>
@@ -59,7 +60,7 @@ using namespace ana;
 
 // This is the main function. To use ROOT's interpreted interface, you need to define a function
 // with the same name as your file (minus the .C file extension)
-void Exercise2Solution()
+void Exercise2aSolution()
 {
   // Define four options for our input CAF samples.
   // Environment variables and wildcards work, as do SAM datasets
@@ -92,37 +93,11 @@ void Exercise2Solution()
   // You need to update it to select only CCQE.
   //Spectrum sTrueENumu(loader, axTrue, kIsNumuCC && !kIsAntiNu);
   
-  // This cut selects true QE interactions
+  // Select the true interaction types
   const Cut kIsQE = SIMPLEVAR(mode) == MODE_QE; //The modes are defined at the top
-  /* ***************
-  But for the sample we want:
-   - Muon neutrinos
-   - Not antineutrinos
-   - QE interactions
-   Define a cut that requires all of those on the line below
-    */
-  const Cut kIsCCQE = kIsQE && kIsNumuCC && !kIsAntiNu;
-  
-  Spectrum sTrueEQE(loader, axTrue, kIsCCQE);
-
-  /* ******* THIS CUT DEFINITION IS FOR THE SECOND PART OF EXERCISE 2 ***
-   The CCQE final state is 1 proton and 1 muon. The code below uses the CAF
-   identify this state.  As it is more complicated, instead of just defining it as
-   a true/false boolean, we are going to have multiple lines of code.
-   The little chunk of code here needs to return true if the event will pass
-   the cut, or false if it will fail.
-   Pass: 1 proton and 1 muon, no other particles
-   The input for this function is a CAF "Standard record"
-   */
-   const Cut kHasQEFinalState([](const caf::SRProxy* sr)
-                             {
-             // This counts all the particles that aren't protons or muons: neutron, pi plus, pi minus, pi 0, positive kaon, negative kaon, neutral kaon, electromagnetic (gammas, electrons) and nuclear fragments. We want NONE of those!
-                               const int totOthers = sr->nN + sr->nipip + sr->nipim + sr->nipi0 + sr->nikp + sr->nikm + sr->nik0 + sr->niem + sr->nNucleus;
-             // pass if the lepton is a mu- (PDG code 13), number of protons is 1, and total other particles is zero
-                               return abs(sr->LepPDG) == PDG_MU && sr->nP == 1 && totOthers == 0;
-                             });
-  // Now our cut's defined, we can make a spectrum as before:
-  Spectrum sTrueEQEfs(loader, axTrue, kHasQEFinalState);
+  const Cut kIsRES = SIMPLEVAR(mode) == MODE_RES;
+  const Cut kIsDIS = SIMPLEVAR(mode) == MODE_DIS;
+  const Cut kIsMEC = SIMPLEVAR(mode) == MODE_MEC;
 
   // This time, we are looking for CC0pi - one negative muon, at least one proton, and no pions
   // Define the cut...
@@ -131,10 +106,12 @@ void Exercise2Solution()
                                   const int totPi = sr->nipip + sr->nipim + sr->nipi0;
                                   return abs(sr->LepPDG) == PDG_MU && sr->nP >= 1 && totPi == 0;
                                 });
-  // ...and make the spectrum.
-  Spectrum sTrueE0pifs(loader, axTrue, kHasCC0PiFinalState);
   
-  
+  // 4 Spectrum objects for the 4 true cuts
+  Spectrum sCC0piQE(loader, axTrue, kIsQE && kHasCC0PiFinalState);
+  Spectrum sCC0piRES(loader, axTrue, kIsRES && kHasCC0PiFinalState);
+  Spectrum sCC0piMEC(loader, axTrue, kIsMEC && kHasCC0PiFinalState);
+  Spectrum sCC0piDIS(loader, axTrue, kIsDIS && kHasCC0PiFinalState);
   
   // Fill all the Spectrum objects
   loader.Go();
@@ -147,33 +124,36 @@ void Exercise2Solution()
   // Convert and draw
   TCanvas *canvas = new TCanvas; // Make a canvas
   
-  // True QE
-  TH1D *hTrueEQE = sTrueEQE.ToTH1(pot, kAzure-7);
+  // Make them all into histograms
   // ROOT colors are defined at https://root.cern.ch/doc/master/classTColor.
-
-  // 1 muon 1 pion
-  TH1D *hTrueEQEfs =sTrueEQEfs.ToTH1(pot, kOrange-2);
+  TH1D *hCC0piQE = sCC0piQE.ToTH1(pot, kAzure-7);
+  TH1D *hCC0piRES =sCC0piRES.ToTH1(pot, kOrange-2);
+  TH1D *hCC0piMEC =sCC0piMEC.ToTH1(pot, kOrange+7);
+  TH1D *hCC0piDIS =sCC0piDIS.ToTH1(pot, kAzure-9);
   
-  // CC0pi
-  TH1D *hTrueE0pifs =sTrueE0pifs.ToTH1(pot, kOrange+7);
+  // This makes unfilled histograms, so let's fill 'em up!
+  hCC0piQE->SetFillColor(kAzure-7);
+  hCC0piRES->SetFillColor(kOrange-2);
+  hCC0piMEC->SetFillColor(kOrange+7);
+  hCC0piDIS->SetFillColor(kAzure-9);
   
-  // These next lines will set the scale so nothing falls off the top
-  double height= TMath::Max(hTrueEQE->GetMaximum(),TMath::Max(hTrueEQEfs->GetMaximum(),hTrueE0pifs->GetMaximum())); // height of the tallest histogram
-  hTrueEQE->GetYaxis()->SetRangeUser(0,height * 1.1); // set the y axis range to 1.1 times the height
-  
-  hTrueEQE->Draw("HIST");
-  hTrueEQEfs->Draw("HIST SAME");
-  hTrueE0pifs->Draw("HIST SAME");
-  
+  // Make a stacked histogram
+  THStack *stack = new THStack("stack","");
+  stack->Add(hCC0piDIS);
+  stack->Add(hCC0piRES);
+  stack->Add(hCC0piMEC);
+  stack->Add(hCC0piQE);
+  stack->Draw("hist");
   
   gPad->SetLogy(false);
   
   auto legend = new TLegend(0.65,0.65,0.9,0.9); // x and y coordinates of corners
   legend->SetHeader("Legend","C"); // option "C" to center the header
-  legend->AddEntry(hTrueEQE,"True CCQE","l");
-  legend->AddEntry(hTrueEQEfs,"1 #mu^{-}, 1 p","l");
-  legend->AddEntry(hTrueE0pifs,"CC0#pi","l");
+  legend->AddEntry(hCC0piQE,"QE","f");
+  legend->AddEntry(hCC0piMEC,"MEC","f");
+  legend->AddEntry(hCC0piRES,"RES","f");
+  legend->AddEntry(hCC0piDIS,"DIS","f");
   legend->Draw();
   
-  canvas->SaveAs("Exercise2.png"); // Save the result
+  canvas->SaveAs("Exercise2a.png"); // Save the result
 }
