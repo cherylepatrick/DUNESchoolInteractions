@@ -94,7 +94,7 @@ void Exercise1()
   TH1D *hTrueENumu = sTrueENumu.ToTH1(pot, kBlue);// Draw our spectrum in blue. ROOT colors are defined at https://root.cern.ch/doc/master/classTColor.html
   hTrueENumu->Draw("HIST"); // This time we turn our spectrum into a ROOT histogram, and draw that. It means we can use the histogram for other things - like a legend.
   TH1D *hTrueENumubar=sTrueENumubar.ToTH1(pot, kBlue, 7);//Antineutrinos are getting a dashed line.
-  hTrueENumubar->Draw("hist same"); // SAME canvas as the previous spectrum
+  hTrueENumubar->Draw("HIST SAME"); // SAME canvas as the previous spectrum
   
   // ******** ADD THE OTHER SPECTRA HERE *********
   // How about red for the electron component...? Make the antineutrinos dashed again
@@ -107,7 +107,7 @@ void Exercise1()
   gPad->SetLogy(); // To turn off, use gPad->SetLogy(false);
   auto legend = new TLegend(0.7,0.7,0.9,0.9); // x and y coordinates of corners
   legend->SetHeader("Legend","C"); // option "C" to center the header
-  legend->AddEntry(sTrueENumu.ToTH1,"$#nu_#mu$","l");
+  legend->AddEntry(hTrueENumu,"#nu_{#mu}","l");
   // ****** FILL IN THE LEGEND *******
   legend->Draw();
   canvas->SaveAs("Exercise1.png"); // Save the result
