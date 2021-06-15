@@ -35,7 +35,7 @@
 
 
 /* *****************
- Define some GENIE interaction modes.
+ I've defined some GENIE interaction modes.
  See full list at https://wiki.dunescience.org/wiki/Scattering_mode
  Use these to make your TRUTH cuts - this the interaction type GENIE simulated
  */
@@ -46,7 +46,7 @@ const int MODE_DIS = 3;
 const int MODE_MEC = 10;
 
 /* ********
- Define some PDG codes (particle identifiers from https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf)
+ I've defined some PDG codes (particle identifiers from https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf)
  You can also find the ID's for things like protons, neutrons, pions and even whole nuclei in the list!
  */
 const int PDG_MU=13;
@@ -60,7 +60,7 @@ using namespace ana;
 
 // This is the main function. To use ROOT's interpreted interface, you need to define a function
 // with the same name as your file (minus the .C file extension)
-void Exercise2aSolution()
+void Exercise2a()
 {
   // Define four options for our input CAF samples.
   // Environment variables and wildcards work, as do SAM datasets
@@ -95,9 +95,7 @@ void Exercise2aSolution()
   
   // Select the true interaction types
   const Cut kIsQE = SIMPLEVAR(mode) == MODE_QE; //The modes are defined at the top
-  const Cut kIsRES = SIMPLEVAR(mode) == MODE_RES;
-  const Cut kIsDIS = SIMPLEVAR(mode) == MODE_DIS;
-  const Cut kIsMEC = SIMPLEVAR(mode) == MODE_MEC;
+ // ****** add more ********
 
   // This time, we are looking for CC0pi - one negative muon, at least one proton, and no pions
   // Define the cut...
@@ -109,9 +107,7 @@ void Exercise2aSolution()
   
   // 4 Spectrum objects for the 4 true cuts
   Spectrum sCC0piQE(loader, axTrue, kIsQE && kHasCC0PiFinalState);
-  Spectrum sCC0piRES(loader, axTrue, kIsRES && kHasCC0PiFinalState);
-  Spectrum sCC0piMEC(loader, axTrue, kIsMEC && kHasCC0PiFinalState);
-  Spectrum sCC0piDIS(loader, axTrue, kIsDIS && kHasCC0PiFinalState);
+  // **** add the other modes ******
   
   // Fill all the Spectrum objects
   loader.Go();
@@ -127,22 +123,17 @@ void Exercise2aSolution()
   // Make them all into histograms
   // ROOT colors are defined at https://root.cern.ch/doc/master/classTColor.
   TH1D *hCC0piQE = sCC0piQE.ToTH1(pot, kAzure-7);
-  TH1D *hCC0piRES =sCC0piRES.ToTH1(pot, kOrange-2);
-  TH1D *hCC0piMEC =sCC0piMEC.ToTH1(pot, kOrange+7);
-  TH1D *hCC0piDIS =sCC0piDIS.ToTH1(pot, kAzure-9);
+  // ***** Make more histograms from the spectra
+
   
   // This makes unfilled histograms, so let's fill 'em up!
   hCC0piQE->SetFillColor(kAzure-7);
-  hCC0piRES->SetFillColor(kOrange-2);
-  hCC0piMEC->SetFillColor(kOrange+7);
-  hCC0piDIS->SetFillColor(kAzure-9);
+  // ******* fill them!
   
   // Make a stacked histogram
   THStack *stack = new THStack("stack","");
-  stack->Add(hCC0piDIS);
-  stack->Add(hCC0piRES);
-  stack->Add(hCC0piMEC);
   stack->Add(hCC0piQE);
+  // ******* Stack them. First on the list goes on the bottom of the stack... choose the order that you think makes it easiest to see what's going on
   stack->Draw("hist");
   
   gPad->SetLogy(false);
@@ -150,9 +141,7 @@ void Exercise2aSolution()
   auto legend = new TLegend(0.65,0.65,0.9,0.9); // x and y coordinates of corners
   legend->SetHeader("Legend","C"); // option "C" to center the header
   legend->AddEntry(hCC0piQE,"QE","f");
-  legend->AddEntry(hCC0piMEC,"MEC","f");
-  legend->AddEntry(hCC0piRES,"RES","f");
-  legend->AddEntry(hCC0piDIS,"DIS","f");
+  // ***** Don't forget the legend!
   legend->Draw();
   
   canvas->SaveAs("Exercise2a.png"); // Save the result
