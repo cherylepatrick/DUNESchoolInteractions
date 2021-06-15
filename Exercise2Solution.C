@@ -27,6 +27,7 @@
 #include "TH1.h" // 1-dimensional histogram
 #include "TPad.h" // Canvases are divided into pads. That could let you draw more than one plot on a canvas, if you wanted to, by using multiple pads. We will not bother with that today.
 #include "TLegend.h" // Lets us draw a legend
+#include "TMath.h" // I'll use some basic math functions
 
 // Standard C++ library for input and output
 #include <iostream>
@@ -42,6 +43,16 @@ const int MODE_QE = 1;
 const int MODE_RES = 4;
 const int MODE_DIS = 3;
 const int MODE_MEC = 10;
+
+/* ********
+ Define some PDG codes (particle identifiers from https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf)
+ You can also find the ID's for things like protons, neutrons, pions and even whole nuclei in the list!
+ */
+const int PDG_MU=13;
+const int PDG_E=11;
+const int PDG_NUMU=14;
+const int PDG_NUE=12;
+
 
 using namespace ana;
 
@@ -94,7 +105,37 @@ void Exercise2Solution()
   
   Spectrum sTrueEQE(loader, axTrue, kIsCCQE);
 
+  /* ******* THIS CUT DEFINITION IS FOR THE SECOND PART OF EXERCISE 2 ***
+   The CCQE final state is 1 proton and 1 muon. The code below uses the CAF
+   identify this state.  As it is more complicated, instead of just defining it as
+   a true/false boolean, we are going to have multiple lines of code.
+   The little chunk of code here needs to return true if the event will pass
+   the cut, or false if it will fail.
+   Pass: 1 proton and 1 muon, no other particles
+   The input for this function is a CAF "Standard record"
+   */
+   const Cut kHasQEFinalState([](const caf::SRProxy* sr)
+                             {
+             // This counts all the particles that aren't protons or muons: neutron, pi plus, pi minus, pi 0, positive kaon, negative kaon, neutral kaon, electromagnetic (gammas, electrons) and nuclear fragments. We want NONE of those!
+                               const int totOthers = sr->nN + sr->nipip + sr->nipim + sr->nipi0 + sr->nikp + sr->nikm + sr->nik0 + sr->niem + sr->nNucleus;
+             // pass if the lepton is a mu- (PDG code 13), number of protons is 1, and total other particles is zero
+                               return abs(sr->LepPDG) == PDG_MU && sr->nP == 1 && totOthers == 0;
+                             });
+  // Now our cut's defined, we can make a spectrum as before:
+  Spectrum sTrueEQEfs(loader, axTrue, kHasQEFinalState);
 
+  // This time, we are looking for CC0pi - one negative muon, at least one proton, and no pions
+  // Define the cut...
+  const Cut kHasCC0PiFinalState([](const caf::SRProxy* sr)
+                                {
+                                  const int totPi = sr->nipip + sr->nipim + sr->nipi0;
+                                  return abs(sr->LepPDG) == PDG_MU && sr->nP >= 1 && totPi == 0;
+                                });
+  // ...and make the spectrum.
+  Spectrum sTrueE0pifs(loader, axTrue, kHasCC0PiFinalState);
+  
+  
+  
   // Fill all the Spectrum objects
   loader.Go();
 
@@ -106,21 +147,33 @@ void Exercise2Solution()
   // Convert and draw
   TCanvas *canvas = new TCanvas; // Make a canvas
   
-  TH1D *hTrueEQE = sTrueEQE.ToTH1(pot, kBlue);// Draw our spectrum in blue. ROOT colors are defined at https://root.cern.ch/doc/master/classTColor.html
+  // True QE
+  TH1D *hTrueEQE = sTrueEQE.ToTH1(pot, kAzure-7);
+  // ROOT colors are defined at https://root.cern.ch/doc/master/classTColor.
 
-  hTrueEQE->Draw("HIST"); // This time we turn our spectrum into a ROOT histogram, and draw that. It means we can use the histogram for other things - like a legend.
+  // 1 muon 1 pion
+  TH1D *hTrueEQEfs =sTrueEQEfs.ToTH1(pot, kOrange-2);
+  
+  // CC0pi
+  TH1D *hTrueE0pifs =sTrueE0pifs.ToTH1(pot, kOrange+7);
+  
+  // These next lines will set the scale so nothing falls off the top
+  double height= TMath::Max(hTrueEQE->GetMaximum(),TMath::Max(hTrueEQEfs->GetMaximum(),hTrueE0pifs->GetMaximum())); // height of the tallest histogram
+  hTrueEQE->GetYaxis()->SetRangeUser(0,height * 1.1); // set the y axis range to 1.1 times the height
+  
+  hTrueEQE->Draw("HIST");
+  hTrueEQEfs->Draw("HIST SAME");
+  hTrueE0pifs->Draw("HIST SAME");
   
   
   gPad->SetLogy(false);
   
-  /*auto legend = new TLegend(0.75,0.65,0.9,0.9); // x and y coordinates of corners
+  auto legend = new TLegend(0.65,0.65,0.9,0.9); // x and y coordinates of corners
   legend->SetHeader("Legend","C"); // option "C" to center the header
-  legend->AddEntry(hTrueENumu,"#nu_{#mu}","l");
-  legend->AddEntry(hTrueENumubar,"#bar{#nu}_{#mu}","l");
-  legend->AddEntry(hTrueENue,"#nu_{e}","l");
-  legend->AddEntry(hTrueENuebar,"#bar{#nu}_{e}","l");
-
+  legend->AddEntry(hTrueEQE,"True CCQE","l");
+  legend->AddEntry(hTrueEQEfs,"1 #mu^{-}, 1 p","l");
+  legend->AddEntry(hTrueE0pifs,"CC0#pi","l");
   legend->Draw();
-  */
+  
   canvas->SaveAs("Exercise2.png"); // Save the result
 }

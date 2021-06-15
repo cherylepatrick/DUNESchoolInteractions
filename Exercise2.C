@@ -96,6 +96,25 @@ void Exercise2Solution()
   //Spectrum sTrueEQE(****************);
 
 
+  /* ******* THIS CUT DEFINITION IS FOR THE SECOND PART OF EXERCISE 2 ***
+   The CCQE final state is 1 proton and 1 muon. The code below uses the CAF
+   identify this state.  As it is more complicated, instead of just defining it as
+   a true/false boolean, we are going to have multiple lines of code.
+   The little chunk of code here needs to return true if the event will pass
+   the cut, or false if it will fail.
+   Pass: 1 proton and 1 muon, no other particles
+   The input for this function is a CAF "Standard record"
+   */
+   const Cut kHasQEFinalState([](const caf::SRProxy* sr)
+                             {
+             // This counts all the particles that aren't protons or muons: neutron, pi plus, pi minus, pi 0, positive kaon, negative kaon, neutral kaon, electromagnetic (gammas, electrons) and nuclear fragments. We want NONE of those!
+                               const int totOthers = sr->nN + sr->nipip + sr->nipim + sr->nipi0 + sr->nikp + sr->nikm + sr->nik0 + sr->niem + sr->nNucleus;
+             // pass if the lepton is a mu- (PDG code 13), number of protons is 1, and total other particles is zero
+                               return abs(sr->LepPDG) == PDG_MU && sr->nP == 1 && totOthers == 0;
+                             });
+  
+  
+  
   // Fill all the Spectrum objects
   loader.Go();
 
