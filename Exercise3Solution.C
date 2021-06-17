@@ -61,8 +61,8 @@ const int PDG_E=11;
 const int PDG_NUMU=14;
 const int PDG_NUE=12;
 
-
 using namespace ana;
+using util::sqr; // Square
 
 // Define the quasi-elastic formula for neutrino energy
 double QEFormula(double Emu, double cosmu) // Muon energy and cosine of muon angle
@@ -152,10 +152,16 @@ void Exercise3Solution()
    */
    const Cut kHasQEFinalState([](const caf::SRProxy* sr)
                              {
+                 // I'm cutting events where the reconstructed neutrino energy or muon energy is zero or not a number, to make this easier to interpret!
+              if(std::isnan(sr->Ev_reco)) return false;
+              if(sr->Ev_reco<=0.) return false;
+              if(sr->Elep_reco<=0.) return false;
+     
              // This counts all the particles that aren't protons or muons: neutron, pi plus, pi minus, pi 0, positive kaon, negative kaon, neutral kaon, electromagnetic (gammas, electrons) and nuclear fragments. We want NONE of those!
                                const int totOthers = sr->nN + sr->nipip + sr->nipim + sr->nipi0 + sr->nikp + sr->nikm + sr->nik0 + sr->niem + sr->nNucleus;
              // pass if the lepton is a mu- (PDG code 13), number of protons is 1, and total other particles is zero
-                               return abs(sr->LepPDG) == PDG_MU && sr->nP == 1 && totOthers == 0;
+
+                               return abs(sr->LepPDG) == PDG_MU && sr->nP == 1 && totOthers == 0 ;
                              });
   // Now our cut's defined, we can make all of our Spectrum objects
   Spectrum sConservedETrue (loader, axConservedETrue, kHasQEFinalState);
@@ -201,7 +207,7 @@ void Exercise3Solution()
   gPad->SetLogy(false);
   
   auto legend = new TLegend(0.65,0.65,0.9,0.9); // x and y coordinates of corners
-  legend->SetHeader("Legend","C"); // option "C" to center the header
+  legend->SetHeader("Reconstruction method","C"); // option "C" to center the header
   legend->AddEntry(hConservedETrue,"Energy cons. (true fs)","l");
   legend->AddEntry(hConservedEReco,"Energy cons. (reco fs)","l");
   legend->AddEntry(hEQE,"QE formula","l");
