@@ -1,4 +1,6 @@
-// To run this, type: cafe --stride 20 Example1.C
+// To run this, type: cafe  Exercise1.C
+// To use only a fraction of the input files (e.g. 1 in 20), type: cafe --stride 20 Exercise1.C
+
 
 // These are standard header files from the CAFAna analysis tool
 // They allow you to load and plot variables for each interaction event
