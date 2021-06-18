@@ -102,7 +102,7 @@ void Exercise2a()
   const Cut kHasCC0PiFinalState([](const caf::SRProxy* sr)
                                 {
                                   const int totPi = sr->nipip + sr->nipim + sr->nipi0;
-                                  return abs(sr->LepPDG) == PDG_MU && sr->nP >= 1 && totPi == 0;
+                                  return sr->LepPDG == PDG_MU && sr->nP >= 1 && totPi == 0;
                                 });
   
   // 4 Spectrum objects for the 4 true cuts

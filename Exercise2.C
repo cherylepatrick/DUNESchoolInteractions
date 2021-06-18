@@ -110,7 +110,7 @@ void Exercise2Solution()
              // This counts all the particles that aren't protons or muons: neutron, pi plus, pi minus, pi 0, positive kaon, negative kaon, neutral kaon, electromagnetic (gammas, electrons) and nuclear fragments. We want NONE of those!
                                const int totOthers = sr->nN + sr->nipip + sr->nipim + sr->nipi0 + sr->nikp + sr->nikm + sr->nik0 + sr->niem + sr->nNucleus;
              // pass if the lepton is a mu- (PDG code 13), number of protons is 1, and total other particles is zero
-                               return abs(sr->LepPDG) == PDG_MU && sr->nP == 1 && totOthers == 0;
+                               return sr->LepPDG == PDG_MU && sr->nP == 1 && totOthers == 0;
                              });
   
   

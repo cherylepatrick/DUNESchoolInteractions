@@ -141,7 +141,7 @@ void Exercise3()
                                const int totOthers = sr->nN + sr->nipip + sr->nipim + sr->nipi0 + sr->nikp + sr->nikm + sr->nik0 + sr->niem + sr->nNucleus;
              // pass if the lepton is a mu- (PDG code 13), number of protons is 1, and total other particles is zero
 
-                               return abs(sr->LepPDG) == PDG_MU && sr->nP == 1 && totOthers == 0 ;
+                               return sr->LepPDG == PDG_MU && sr->nP == 1 && totOthers == 0 ;
                              });
   
   // Now our cut's defined, we can make all of our Spectrum objects
