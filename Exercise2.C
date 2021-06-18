@@ -43,12 +43,21 @@ const int MODE_RES = 4;
 const int MODE_DIS = 3;
 const int MODE_MEC = 10;
 
-using namespace ana;
 
+/* ********
+ Define some PDG codes (particle identifiers from https://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf)
+ You can also find the ID's for things like protons, neutrons, pions and even whole nuclei in the list!
+ */
+const int PDG_MU=13;
+const int PDG_E=11;
+const int PDG_NUMU=14;
+const int PDG_NUE=12;
+
+using namespace ana;
 
 // This is the main function. To use ROOT's interpreted interface, you need to define a function
 // with the same name as your file (minus the .C file extension)
-void Exercise2Solution()
+void Exercise2()
 {
   // Define four options for our input CAF samples.
   // Environment variables and wildcards work, as do SAM datasets
