@@ -63,10 +63,10 @@ void Exercise2()
   // Environment variables and wildcards work, as do SAM datasets
   // (a metadata database Fermilab uses to organise large volumes of data and simulation files).
   
-  const std::string NDGAR_FHC = "/pnfs/dune/persistent/users/marshalc/CAF/CAFv5gas/CAF_FHC_90*.root"; //ND-GAr FHC
-  const std::string NDGAR_RHC = "/pnfs/dune/persistent/users/marshalc/CAF/CAFv5gas/CAF_RHC_90*.root"; //ND-GAr RHC
-  const std::string NDLAR_FHC = "/pnfs/dune/persistent/users/marshalc/CAF/CAFv5/00/CAF_FHC_90*.root"; //ND-LAr FHC
-  const std::string NDLAR_RHC = "/pnfs/dune/persistent/users/marshalc/CAF/CAFv5/00/CAF_RHC_90*.root"; //ND-LAr RHC
+  const std::string NDGAR_FHC = "/Disk/ds-sopa-group/PPE/dune/DuneSchool/CAFs/NDGAr/CAF_FHC_90*.root"; //ND-GAr FHC
+  const std::string NDGAR_RHC = "/Disk/ds-sopa-group/PPE/dune/DuneSchool/CAFs/NDGAr/CAF_RHC_90*.root"; //ND-GAr RHC
+  const std::string NDLAR_FHC = "/Disk/ds-sopa-group/PPE/dune/DuneSchool/CAFs/NDLAr/CAF_FHC_90*.root"; //ND-LAr FHC
+  const std::string NDLAR_RHC = "/Disk/ds-sopa-group/PPE/dune/DuneSchool/CAFs/NDLAr/CAF_RHC_90*.root"; //ND-LAr RHC
   
   // Source of events - load them from the one of the sets of files
   SpectrumLoader loader(NDGAR_FHC); // ***** Change this to use a different sample *****
