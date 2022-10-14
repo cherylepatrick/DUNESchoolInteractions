@@ -40,7 +40,7 @@ void Example1()
   // This points to the source files we will use. These ones are for the ND-GAr.
   // Environment variables and wildcards work, as do SAM datasets
   // (a metadata database Fermilab uses to organise large volumes of data and simulation files).
-  const std::string fname = "/pnfs/dune/persistent/users/marshalc/CAF/CAFv5gas/CAF_FHC_90*.root";
+  const std::string fname = "/Disk/ds-sopa-group/PPE/dune/DuneSchool/CAFs/NDGAr/CAF_FHC_90*.root";
 
   // Source of events - load them from the files
   SpectrumLoader loader(fname);
